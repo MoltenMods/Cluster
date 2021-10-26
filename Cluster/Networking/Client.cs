@@ -3,6 +3,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Blueprint.Messages.H2C;
 using Blueprint.Messages.Objects;
+using Blueprint.Messages.S2C;
 using Microsoft.Extensions.ObjectPool;
 using Singularity.Hazel;
 using Singularity.Hazel.Api.Net.Messages;
@@ -54,7 +55,16 @@ namespace Cluster.Networking
 
             switch (flag)
             {
+                case Blueprint.Messages.MessageType.HostGame:
+                {
+                    HostGameS2C.Deserialize(reader, out var gameCode);
+
+                    this.OnHostedGame?.Invoke(gameCode);
+
+                    break;
+                }
                 case Blueprint.Messages.MessageType.JoinedGame:
+                {
                     JoinedGameH2C.Deserialize(
                         reader,
                         out GameCode gameCode,
@@ -62,13 +72,10 @@ namespace Cluster.Networking
                         out uint hostId,
                         out uint[] otherPlayerIds);
                     
-                    Console.Out.WriteLine(
-                        "Joined game {0} with player id {1} and host id {2}",
-                        gameCode.Code,
-                        playerId.ToString(),
-                        hostId.ToString());
-                    
+                    this.OnJoinedGame?.Invoke(gameCode, playerId, hostId, otherPlayerIds);
+
                     break;
+                }
             }
         }
     }
