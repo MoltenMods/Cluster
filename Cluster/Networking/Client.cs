@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using Blueprint.Enums.Networking;
+using Blueprint.Messages.GameData;
 using Blueprint.Messages.H2C;
 using Blueprint.Messages.Objects;
 using Blueprint.Messages.S2C;
@@ -52,6 +54,8 @@ namespace Cluster.Networking
         private async ValueTask HandleMessageAsync(IMessageReader reader, MessageType type)
         {
             var flag = (Blueprint.Messages.MessageType) reader.Tag;
+            
+            this.OnMessage?.Invoke(flag);
 
             switch (flag)
             {
@@ -63,17 +67,72 @@ namespace Cluster.Networking
 
                     break;
                 }
+                case Blueprint.Messages.MessageType.JoinGame:
+                {
+                    JoinGameS2C.Deserialize(reader, out var gameCode, out var joiningPlayerId, out var hostId);
+                    
+                    this.OnPlayerJoined?.Invoke(gameCode, joiningPlayerId, hostId);
+                    
+                    break;
+                }
+                case Blueprint.Messages.MessageType.StartGame:
+                {
+                    StartGameH2C.Deserialize(reader, out GameCode gameCode);
+                    
+                    this.OnStartedGame?.Invoke(gameCode);
+
+                    break;
+                }
+                case Blueprint.Messages.MessageType.RemoveGame:
+                {
+                    RemoveGameS2C.Deserialize(reader, out var disconnectReason);
+                    
+                    this.OnRemovedGame?.Invoke(disconnectReason);
+                    
+                    break;
+                }
+                case Blueprint.Messages.MessageType.RemovePlayer:
+                {
+                    RemovePlayerS2C.Deserialize(
+                        reader,
+                        out var gameCode,
+                        out var clientId,
+                        out var hostId,
+                        out var disconnectReason);
+                    
+                    this.OnRemovedPlayer?.Invoke(gameCode, clientId, hostId, disconnectReason);
+
+                    break;
+                }
+                case Blueprint.Messages.MessageType.GameData:
+                {
+                    // TODO: implement game data parsing in Blueprint
+
+                    break;
+                }
+                case Blueprint.Messages.MessageType.GameDataTo:
+                {
+                    break;
+                }
                 case Blueprint.Messages.MessageType.JoinedGame:
                 {
                     JoinedGameH2C.Deserialize(
                         reader,
-                        out GameCode gameCode,
-                        out uint playerId,
-                        out uint hostId,
-                        out uint[] otherPlayerIds);
+                        out var gameCode,
+                        out var playerId,
+                        out var hostId,
+                        out var otherPlayerIds);
                     
                     this.OnJoinedGame?.Invoke(gameCode, playerId, hostId, otherPlayerIds);
 
+                    break;
+                }
+                case Blueprint.Messages.MessageType.EndGame:
+                {
+                    EndGameH2C.Deserialize(reader, out var gameCode, out var gameOverReason, out var showAd);
+                    
+                    this.OnEndedGame?.Invoke(gameCode, gameOverReason, showAd);
+                    
                     break;
                 }
             }
