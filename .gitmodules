@@ -1,0 +1,6 @@
+[submodule "Blueprint"]
+	path = Blueprint
+	url = https://github.com/DaemonBeast/Blueprint
+[submodule "Singularity.Hazel"]
+	path = Singularity.Hazel
+	url = https://github.com/DaemonBeast/Singularity.Hazel.git
