@@ -38,8 +38,6 @@ namespace Cluster.Networking
 
         private async ValueTask OnDataReceived(DataReceivedEventArgs e)
         {
-            await Console.Out.WriteLineAsync("Got data");
-
             while (e.Message.Position < e.Message.Length)
             {
                 await this.HandleMessageAsync(e.Message.ReadMessage(), e.Type);
@@ -48,14 +46,14 @@ namespace Cluster.Networking
 
         private async ValueTask OnDisconnect(DisconnectedEventArgs e)
         {
-            await Console.Out.WriteLineAsync("disconnected");
+            this.OnDisconnected.Invoke(e.Message, e.Reason);
         }
 
         private async ValueTask HandleMessageAsync(IMessageReader reader, MessageType type)
         {
             var flag = (Blueprint.Messages.MessageType) reader.Tag;
             
-            this.OnMessage?.Invoke(flag);
+            this.OnMessage?.Invoke(reader.Copy(), flag);
 
             switch (flag)
             {
@@ -77,7 +75,7 @@ namespace Cluster.Networking
                 }
                 case Blueprint.Messages.MessageType.StartGame:
                 {
-                    StartGameH2C.Deserialize(reader, out GameCode gameCode);
+                    StartGameH2C.Deserialize(reader, out var gameCode);
                     
                     this.OnStartedGame?.Invoke(gameCode);
 

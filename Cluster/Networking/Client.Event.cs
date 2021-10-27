@@ -1,14 +1,19 @@
 ﻿using Blueprint.Enums.Networking;
-using Blueprint.Messages;
 using Blueprint.Messages.Objects;
+using Singularity.Hazel.Api.Net.Messages;
+using MessageType = Blueprint.Messages.MessageType;
 
 namespace Cluster.Networking
 {
     public partial class Client
     {
-        public delegate void MessageHandler(MessageType messageType);
+        public delegate void MessageHandler(IMessageReader reader, MessageType messageType);
 
         public event MessageHandler OnMessage;
+
+        public delegate void DisconnectedHandler(IMessageReader reader, string reason);
+
+        public event DisconnectedHandler OnDisconnected;
         
         public delegate void HostedGameHandler(GameCode gameCode);
 
