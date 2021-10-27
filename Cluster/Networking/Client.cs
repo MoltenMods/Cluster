@@ -46,7 +46,7 @@ namespace Cluster.Networking
 
         private async ValueTask OnDisconnect(DisconnectedEventArgs e)
         {
-            this.OnDisconnected.Invoke(e.Message, e.Reason);
+            this.OnDisconnected?.Invoke(e.Message.Copy(), e.Reason);
         }
 
         private async ValueTask HandleMessageAsync(IMessageReader reader, MessageType type)
