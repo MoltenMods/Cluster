@@ -67,10 +67,17 @@ namespace Cluster.Networking
                 }
                 case Blueprint.Messages.MessageType.JoinGame:
                 {
-                    JoinGameS2C.Deserialize(reader, out var gameCode, out var joiningPlayerId, out var hostId);
-                    
-                    this.OnPlayerJoined?.Invoke(gameCode, joiningPlayerId, hostId);
-                    
+                    if (JoinGameS2C.TryDeserialize(reader, out var gameCode, out var joiningPlayerId, out var hostId))
+                    {
+                        this.OnPlayerJoined?.Invoke(gameCode, joiningPlayerId!.Value, hostId!.Value);
+                    }
+                    else
+                    {
+                        JoinGameS2C.TryDeserialize(reader, out var disconnectReason);
+                        
+                        this.OnPlayerJoinedError?.Invoke(disconnectReason!.Value);
+                    }
+
                     break;
                 }
                 case Blueprint.Messages.MessageType.StartGame:

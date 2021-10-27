@@ -23,6 +23,10 @@ namespace Cluster.Networking
 
         public event PlayerJoinedHandler OnPlayerJoined;
 
+        public delegate void PlayerJoinedErrorHandler(DisconnectReason disconnectReason);
+
+        public event PlayerJoinedErrorHandler OnPlayerJoinedError;
+
         public delegate void StartedGameHandler(GameCode gameCode);
 
         public event StartedGameHandler OnStartedGame;
