@@ -1,10 +1,6 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Threading.Tasks;
-using Blueprint.Enums.Networking;
-using Blueprint.Messages.GameData;
 using Blueprint.Messages.H2C;
-using Blueprint.Messages.Objects;
 using Blueprint.Messages.S2C;
 using Microsoft.Extensions.ObjectPool;
 using Singularity.Hazel;
@@ -17,8 +13,14 @@ namespace Cluster.Networking
     {
         public UdpClientConnection Connection { get; }
 
+        private IPEndPoint _ipEndPoint;
+        private ObjectPool<MessageReader> _readerPool;
+
         public Client(IPEndPoint ipEndPoint, ObjectPool<MessageReader> readerPool)
         {
+            this._ipEndPoint = ipEndPoint;
+            this._readerPool = readerPool;
+            
             this.Connection = new UdpClientConnection(ipEndPoint, readerPool)
             {
                 DataReceived = OnDataReceived,
@@ -26,9 +28,9 @@ namespace Cluster.Networking
             };
         }
 
-        public async Task StartAsync()
+        public async Task ConnectAsync(uint authNonce = 0)
         {
-            await this.Connection.ConnectAsync(this.GetConnectionData());
+            await this.Connection.ConnectAsync(this.GetConnectionData(authNonce));
         }
 
         public void Stop()
@@ -44,12 +46,14 @@ namespace Cluster.Networking
             }
         }
 
-        private async ValueTask OnDisconnect(DisconnectedEventArgs e)
+        private ValueTask OnDisconnect(DisconnectedEventArgs e)
         {
-            this.OnDisconnected?.Invoke(e.Message.Copy(), e.Reason);
+            this.OnDisconnected?.Invoke(e.Message?.Copy(), e.Reason);
+            
+            return ValueTask.CompletedTask;
         }
 
-        private async ValueTask HandleMessageAsync(IMessageReader reader, MessageType type)
+        private ValueTask HandleMessageAsync(IMessageReader reader, MessageType type)
         {
             var flag = (Blueprint.Messages.MessageType) reader.Tag;
             
@@ -141,6 +145,8 @@ namespace Cluster.Networking
                     break;
                 }
             }
+            
+            return ValueTask.CompletedTask;
         }
     }
 }

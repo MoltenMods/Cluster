@@ -1,5 +1,6 @@
-﻿using System.IO;
-using Blueprint.Enums.Networking;
+﻿using Blueprint.Enums.Networking;
+using Blueprint.Messages.C2S;
+using Blueprint.Messages.Objects;
 
 namespace Cluster.Networking
 {
@@ -25,18 +26,14 @@ namespace Cluster.Networking
             this.ChatMode = chatMode;
         }
 
-        internal byte[] GetConnectionData()
+        internal byte[] GetConnectionData(uint authNonce = 0)
         {
-            using var memoryStream = new MemoryStream();
-            using var binaryWriter = new BinaryWriter(memoryStream);
-            
-            binaryWriter.Write(this.BroadcastVersion);
-            binaryWriter.Write(this.PlayerName);
-            binaryWriter.Write((uint) 1);     // should be a nonce
-            binaryWriter.Write((uint) this.Language);
-            binaryWriter.Write((byte) this.ChatMode);
-
-            return memoryStream.ToArray();
+            return HandshakeC2S.Serialize(
+                this.BroadcastVersion,
+                this.PlayerName,
+                authNonce,
+                this.Language,
+                this.ChatMode);
         }
     }
 }
