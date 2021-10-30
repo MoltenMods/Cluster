@@ -36,6 +36,17 @@ namespace Cluster.Networking
             await this.Connection.SendAsync(writer);
         }
 
+        public async ValueTask Despawn(InnerNetObject innerNetObject, GameCode gameCode)
+        {
+            using var writer = MessageWriter.Get(MessageType.Reliable);
+            
+            GameData.StartGameDataMessage(writer, gameCode);
+            innerNetObject.WriteDespawnMessage(writer);
+            writer.EndMessage();
+
+            await this.Connection.SendAsync(writer);
+        }
+
         public async ValueTask Update(InnerNetObject innerNetObject, GameCode gameCode)
         {
             using var writer = MessageWriter.Get(MessageType.Reliable);
