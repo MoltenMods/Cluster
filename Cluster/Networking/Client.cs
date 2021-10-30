@@ -132,6 +132,9 @@ namespace Cluster.Networking
                         out var hostId,
                         out var otherPlayerIds);
                     
+                    this.Id = (int) playerId;
+                    this.HostId = (int) hostId;
+                    
                     this.OnJoinedGame?.Invoke(gameCode, playerId, hostId, otherPlayerIds);
 
                     break;

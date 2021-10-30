@@ -22,12 +22,15 @@ namespace Cluster.Networking
         
         // TODO: create GameData streams
 
-        public async ValueTask Spawn(InnerNetObject innerNetObject, GameCode gameCode)
+        public async ValueTask Spawn(
+            InnerNetObject innerNetObject,
+            GameCode gameCode,
+            SpawnFlags spawnFlags = SpawnFlags.None)
         {
             using var writer = MessageWriter.Get(MessageType.Reliable);
             
             GameData.StartGameDataMessage(writer, gameCode);
-            innerNetObject.WriteSpawnMessage(writer, SpawnFlags.None);
+            innerNetObject.WriteSpawnMessage(writer, spawnFlags);
             writer.EndMessage();
 
             await this.Connection.SendAsync(writer);
@@ -44,7 +47,9 @@ namespace Cluster.Networking
             await this.Connection.SendAsync(writer);
         }
         
-        public async ValueTask HostGame(GameOptionsData options, QuickChatMode chatMode = QuickChatMode.FreeChatOrQuickChat)
+        public async ValueTask HostGame(
+            GameOptionsData options,
+            QuickChatMode chatMode = QuickChatMode.FreeChatOrQuickChat)
         {
             using var writer = MessageWriter.Get(MessageType.Reliable);
             HostGameC2S.Serialize(writer, options, chatMode);

@@ -1,11 +1,14 @@
 ﻿using Blueprint.Enums.Networking;
 using Blueprint.Messages.C2S;
-using Blueprint.Messages.Objects;
 
 namespace Cluster.Networking
 {
     public class ClientBase
     {
+        public int Id { get; internal set; }
+        
+        public int HostId { get; internal set; }
+        
         public int BroadcastVersion { get; }
         
         public string PlayerName { get; set; }
